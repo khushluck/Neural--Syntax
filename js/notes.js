@@ -1,23 +1,27 @@
-fetch('data/notes.json')
-  .then(res => res.json())
-  .then(data => {
+export default async function handler(req, res) {
+  const NOTION_API_KEY = process.env.NOTION_API_KEY;
+  const DATABASE_ID = process.env.NOTION_DATABASE_ID;
 
-    const container = document.getElementById("notes");
+  const response = await fetch(
+    `https://api.notion.com/v1/databases/${DATABASE_ID}/query`,
+    {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${NOTION_API_KEY}`,
+        "Notion-Version": "2022-06-28",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        filter: {
+          property: "Status",
+          select: {
+            equals: "Published"
+          }
+        }
+      })
+    }
+  );
 
-    data.forEach(note => {
-      container.innerHTML += `
-        <div class="bg-[#111827] p-4 rounded-xl border border-[#1f2937] hover:border-[#22c1f1] transition">
-
-          <h2 class="text-lg font-semibold">${note.title}</h2>
-          <p class="text-sm text-gray-400">${note.course}</p>
-
-          <a href="${note.file}" 
-             class="text-[#22c1f1] text-sm mt-2 inline-block">
-            Read Notes →
-          </a>
-
-        </div>
-      `;
-    });
-
-  });
+  const data = await response.json();
+  res.status(200).json(data.results);
+}
