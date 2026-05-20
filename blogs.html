@@ -86,33 +86,32 @@
     </div>
 
     <script>
-      const BLOG_URL = "https://neuralsyntaxofficial.blogspot.com";
-
       function renderPosts(data) {
-        const grid = document.getElementById("blog-grid");
-        grid.innerHTML = "";
+  const grid = document.getElementById("blog-grid");
+  grid.innerHTML = "";
 
-        if (!data.feed || !data.feed.entry) {
-          grid.innerHTML = "<div class='loader'>No posts found</div>";
-          return;
-        }
+  console.log("FULL DATA:", data); // debug
 
-        data.feed.entry.forEach((entry) => {
-          const title = entry.title.$t;
-          const postId = entry.id.$t;
+  const entries = data.feed?.entry;
 
-          let img = "";
-          if (entry.media$thumbnail) {
-            img = entry.media$thumbnail.url.replace(/\/s[0-9]+/, "/s1600");
-          } else {
-            img = "https://via.placeholder.com/800x400";
-          }
+  if (!entries || entries.length === 0) {
+    grid.innerHTML = "<div class='loader'>No posts found</div>";
+    return;
+  }
 
-          let summary = (entry.summary?.$t || entry.content.$t)
-            .replace(/<[^>]*>/g, "")
-            .slice(0, 120);
+  entries.forEach(entry => {
 
-          const card = `
+    const title = entry.title.$t;
+    const postId = entry.id.$t;
+
+    let img = entry.media$thumbnail?.url || "";
+    img = img.replace(/\/s[0-9]+/, "/s1600");
+
+    let summary = (entry.summary?.$t || entry.content.$t)
+      .replace(/<[^>]*>/g, "")
+      .slice(0, 120);
+
+    const card = `
       <a href="blog.html?id=${encodeURIComponent(postId)}" class="post-card">
         <div class="post-banner" style="background-image:url('${img}')"></div>
         <div class="post-content">
@@ -122,14 +121,9 @@
       </a>
     `;
 
-          grid.innerHTML += card;
-        });
-      }
-
-      // ✅ LOAD JSONP PROPERLY
-      const script = document.createElement("script");
-      script.src = `${BLOG_URL}/feeds/posts/default?alt=json-in-script&max-results=10&callback=renderPosts`;
-      document.body.appendChild(script);
+    grid.innerHTML += card;
+  });
+}
     </script>
   </body>
 </html>
