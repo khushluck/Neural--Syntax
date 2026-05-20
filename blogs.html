@@ -86,20 +86,22 @@
     </div>
 
     <script>
-      function renderPosts(data) {
+const BLOG_URL = "https://neuralsyntaxofficial.blogspot.com";
+
+// ✅ MAKE FUNCTION GLOBAL
+window.renderPosts = function(data) {
   const grid = document.getElementById("blog-grid");
-  grid.innerHTML = "";
 
-  console.log("FULL DATA:", data); // debug
+  console.log("DATA RECEIVED:", data);
 
-  const entries = data.feed?.entry;
-
-  if (!entries || entries.length === 0) {
+  if (!data || !data.feed || !data.feed.entry) {
     grid.innerHTML = "<div class='loader'>No posts found</div>";
     return;
   }
 
-  entries.forEach(entry => {
+  grid.innerHTML = "";
+
+  data.feed.entry.forEach(entry => {
 
     const title = entry.title.$t;
     const postId = entry.id.$t;
@@ -123,7 +125,18 @@
 
     grid.innerHTML += card;
   });
-}
-    </script>
+};
+
+// ✅ LOAD SCRIPT AFTER FUNCTION
+const script = document.createElement("script");
+script.src = `${BLOG_URL}/feeds/posts/default?alt=json-in-script&max-results=10&callback=renderPosts`;
+
+script.onerror = () => {
+  document.getElementById("blog-grid").innerHTML =
+    "<div class='loader'>Failed to load posts</div>";
+};
+
+document.body.appendChild(script);
+</script>
   </body>
 </html>
