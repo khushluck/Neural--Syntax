@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog | Neural Syntax</title>
+
+    <style>
+      :root {
+        --bg-dark: #0d1117;
+        --card-bg: #161b22;
+        --text-primary: #c9d1d9;
+        --text-secondary: #8b949e;
+        --accent-blue: #58a6ff;
+        --border-color: #30363d;
+        --hover-border: #58a6ff;
+      }
+
+      body {
+        background: var(--bg-dark);
+        color: var(--text-primary);
+        font-family: Arial;
+        margin: 0;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 40px 20px;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 50px;
+      }
+
+      #blog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 30px;
+      }
+
+      .post-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+        text-decoration: none;
+        color: white;
+        transition: 0.3s;
+      }
+
+      .post-card:hover {
+        transform: translateY(-10px);
+        border-color: var(--hover-border);
+      }
+
+      .post-banner {
+        height: 220px;
+        background-size: cover;
+        background-position: center;
+        pointer-events: none;
+      }
+
+      .post-content {
+        padding: 20px;
+      }
+
+      .loader {
+        text-align: center;
+        padding: 80px;
+        color: var(--accent-blue);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <h1>Neural Syntax Blog</h1>
+      </header>
+
+      <div id="blog-grid">
+        <div class="loader">Loading...</div>
+      </div>
+    </div>
+
+    <script>
+      const BLOG_URL = "https://neuralsyntaxofficial.blogspot.com";
+
+      function renderPosts(data) {
+        const grid = document.getElementById("blog-grid");
+        grid.innerHTML = "";
+
+        if (!data.feed || !data.feed.entry) {
+          grid.innerHTML = "<div class='loader'>No posts found</div>";
+          return;
+        }
+
+        data.feed.entry.forEach((entry) => {
+          const title = entry.title.$t;
+          const postId = entry.id.$t;
+
+          let img = "";
+          if (entry.media$thumbnail) {
+            img = entry.media$thumbnail.url.replace(/\/s[0-9]+/, "/s1600");
+          } else {
+            img = "https://via.placeholder.com/800x400";
+          }
+
+          let summary = (entry.summary?.$t || entry.content.$t)
+            .replace(/<[^>]*>/g, "")
+            .slice(0, 120);
+
+          const card = `
+      <a href="blog.html?id=${encodeURIComponent(postId)}" class="post-card">
+        <div class="post-banner" style="background-image:url('${img}')"></div>
+        <div class="post-content">
+          <h2>${title}</h2>
+          <p>${summary}...</p>
+        </div>
+      </a>
+    `;
+
+          grid.innerHTML += card;
+        });
+      }
+
+      // ✅ LOAD JSONP PROPERLY
+      const script = document.createElement("script");
+      script.src = `${BLOG_URL}/feeds/posts/default?alt=json-in-script&max-results=10&callback=renderPosts`;
+      document.body.appendChild(script);
+    </script>
+  </body>
+</html>
